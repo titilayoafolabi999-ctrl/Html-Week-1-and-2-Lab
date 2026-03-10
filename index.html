@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>HTMLab — Week 1 & 2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#05080f; --s1:#0c1120; --s2:#111b2e; --s3:#172038;
+      --bd:#1e2d47; --bd2:#253554;
+      --a1:#3b82f6; --a2:#8b5cf6; --a3:#06b6d4;
+      --green:#22c55e; --red:#ef4444; --yellow:#eab308; --orange:#f97316;
+      --text:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+      --w1:#f97316; --w2:#3b82f6;
+      --nav-h:52px; --bot-h:62px;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    html{height:100%;-webkit-text-size-adjust:100%;}
+    body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);height:100%;overflow:hidden;}
+
+    /* ── TOPBAR ── */
+    .topbar{height:var(--nav-h);background:var(--s1);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 14px;gap:10px;position:sticky;top:0;z-index:80;flex-shrink:0;}
+    .logo{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;background:linear-gradient(90deg,var(--a3),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;flex-shrink:0;}
+    .week-tabs{display:flex;gap:3px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:3px;flex-shrink:0;}
+    .week-tab{padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);border:none;background:none;font-family:'Space Grotesk',sans-serif;transition:all .15s;white-space:nowrap;}
+    .week-tab.active-w1{background:var(--w1);color:#000;}
+    .week-tab.active-w2{background:var(--w2);color:#fff;}
+    .tb-spacer{flex:1;}
+    .progress-wrap{flex:1;max-width:240px;min-width:60px;}
+    .progress-meta{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);font-family:'Space Mono',monospace;margin-bottom:3px;}
+    .progress-track{height:4px;background:var(--bd);border-radius:99px;overflow:hidden;}
+    .progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--a2),var(--a1));transition:width .5s ease;}
+    .xp-pill{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--yellow);background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:3px 7px;white-space:nowrap;flex-shrink:0;}
+    .db-pill{display:flex;align-items:center;gap:4px;font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);background:var(--s2);border:1px solid var(--bd);border-radius:99px;padding:3px 8px;white-space:nowrap;flex-shrink:0;}
+    .db-dot{width:6px;height:6px;border-radius:50%;background:var(--red);transition:background .3s;flex-shrink:0;}
+    .db-dot.on{background:var(--green);}
+    .btn-setup{background:transparent;border:1px solid var(--bd);color:var(--muted2);padding:4px 10px;border-radius:6px;font-size:11px;font-family:'Space Grotesk',sans-serif;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .15s;}
+    .btn-setup:hover{border-color:var(--a1);color:var(--a1);}
+
+    /* ── DESKTOP LAYOUT ── */
+    .app{display:grid;grid-template-columns:230px 1fr;height:calc(100dvh - var(--nav-h));overflow:hidden;}
+    .sidebar{background:var(--s1);border-right:1px solid var(--bd);overflow-y:auto;display:flex;flex-direction:column;}
+    .sidebar-week{padding:10px 12px 4px;}
+    .sidebar-week-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:5px 8px;border-radius:5px;margin-bottom:3px;display:flex;align-items:center;gap:6px;}
+    .sidebar-week-label.w1{color:var(--w1);background:#f9731612;}
+    .sidebar-week-label.w2{color:var(--w2);background:#3b82f612;}
+    .ch-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;cursor:pointer;font-size:12px;color:var(--muted2);border-left:2px solid transparent;transition:all .15s;margin:1px 0;touch-action:manipulation;}
+    .ch-item:hover,.ch-item:active{background:var(--s2);color:var(--text);}
+    .ch-item.active{background:var(--s2);color:var(--text);border-left-color:var(--a1);}
+    .ch-item.done{color:var(--green);}
+    .ch-item.done.active{border-left-color:var(--green);}
+    .ch-num{width:20px;height:20px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'Space Mono',monospace;font-weight:700;flex-shrink:0;}
+    .ch-item.done .ch-num{background:var(--green);color:#000;}
+    .ch-item.active:not(.done) .ch-num{background:var(--a1);color:#fff;}
+    .sidebar-footer{margin-top:auto;padding:12px;border-top:1px solid var(--bd);}
+    .student-info{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);margin-bottom:7px;}
+    .student-info span{color:var(--a3);}
+    .btn-sb{width:100%;background:transparent;border:1px solid var(--bd);color:var(--muted2);padding:6px;font-size:11px;border-radius:6px;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:600;transition:all .15s;}
+    .btn-sb:hover{border-color:var(--a1);color:var(--a1);}
+
+    .main{display:grid;grid-template-rows:1fr 180px;overflow:hidden;}
+    .editor-area{display:grid;grid-template-columns:1fr 1fr;overflow:hidden;}
+    .instructions{border-right:1px solid var(--bd);overflow-y:auto;padding:20px 22px;}
+    .editor-col{display:flex;flex-direction:column;overflow:hidden;}
+    .editor-bar{background:var(--s1);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;padding:7px 12px;flex-shrink:0;}
+    .file-tab{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted2);background:var(--s2);border:1px solid var(--bd);border-radius:4px;padding:2px 8px;}
+    .editor-btns{display:flex;gap:5px;}
+    .btn{border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-weight:600;border-radius:6px;transition:all .15s;touch-action:manipulation;}
+    .btn-reset{background:var(--s3);border:1px solid var(--bd);color:var(--muted2);padding:5px 10px;font-size:11px;}
+    .btn-reset:hover{color:var(--yellow);border-color:var(--yellow);}
+    .btn-run{background:var(--a3);color:#000;padding:5px 12px;font-size:11px;}
+    .btn-check{background:var(--a2);color:#fff;padding:5px 12px;font-size:11px;}
+    .btn-run:hover,.btn-check:hover{opacity:.85;}
+    textarea.code-ta{flex:1;background:#030710;color:#c9d8f0;border:none;padding:16px;font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.85;resize:none;outline:none;tab-size:2;-webkit-overflow-scrolling:touch;}
+    textarea.code-ta::placeholder{color:#1e2d47;}
+
+    .bottom-panel{border-top:1px solid var(--bd);display:grid;grid-template-columns:1fr 1fr;background:var(--s1);overflow:hidden;}
+    .pane{display:flex;flex-direction:column;overflow:hidden;}
+    .pane+.pane{border-left:1px solid var(--bd);}
+    .pane-bar{padding:5px 12px;font-size:10px;font-family:'Space Mono',monospace;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--bd);flex-shrink:0;}
+    iframe.preview-frame{flex:1;border:none;background:#fff;width:100%;}
+    .console-out{flex:1;overflow-y:auto;padding:8px 12px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.75;}
+    .cl{margin-bottom:2px;}
+    .cl-info{color:var(--a3);} .cl-ok{color:var(--green);} .cl-fail{color:var(--red);} .cl-warn{color:var(--yellow);} .cl-muted{color:var(--muted);}
+
+    /* ── INSTRUCTION CONTENT ── */
+    .ch-meta{display:flex;align-items:center;gap:7px;margin-bottom:12px;flex-wrap:wrap;}
+    .tag-pill{font-size:10px;font-family:'Space Mono',monospace;font-weight:700;padding:3px 8px;border-radius:4px;}
+    .tag-w1{background:#f9731620;color:var(--w1);} .tag-w2{background:#3b82f620;color:var(--w2);} .tag-xp{background:#eab30820;color:var(--yellow);}
+    .ch-title{font-size:18px;font-weight:700;line-height:1.25;margin-bottom:9px;letter-spacing:-.3px;}
+    .ch-desc{font-size:13px;color:var(--muted2);line-height:1.75;margin-bottom:16px;}
+    .callout{border-radius:7px;padding:12px 14px;margin-bottom:14px;font-size:12.5px;line-height:1.7;}
+    .callout-concept{background:#3b82f610;border-left:3px solid var(--a1);color:var(--muted2);}
+    .callout-warning{background:#ef444410;border-left:3px solid var(--red);color:var(--muted2);}
+    .callout-tip{background:#22c55e10;border-left:3px solid var(--green);color:var(--muted2);}
+    .callout strong{color:var(--text);display:block;margin-bottom:3px;font-size:10px;letter-spacing:.5px;text-transform:uppercase;}
+    .example-block{background:#020509;border:1px solid var(--bd);border-radius:7px;padding:12px 14px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.9;margin-bottom:16px;overflow-x:auto;}
+    .hl-tag{color:#60a5fa;} .hl-attr{color:#c084fc;} .hl-val{color:#34d399;} .hl-cmnt{color:#374151;font-style:italic;} .hl-dt{color:var(--yellow);} .hl-text{color:#e2e8f0;}
+    .tasks-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+    .task-row{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12.5px;color:var(--muted2);}
+    .task-row:last-child{border-bottom:none;}
+    .task-dot{width:15px;height:15px;border-radius:50%;border:2px solid var(--bd2);flex-shrink:0;margin-top:2px;}
+
+    /* ── MOBILE NAV ── */
+    .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--bot-h);background:var(--s1);border-top:1px solid var(--bd);z-index:90;padding-bottom:env(safe-area-inset-bottom,0px);}
+    .mnav-inner{display:grid;grid-template-columns:repeat(5,1fr);height:100%;}
+    .mnav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--muted);font-size:9px;font-family:'Space Grotesk',sans-serif;font-weight:600;touch-action:manipulation;transition:color .15s;padding:4px 0;}
+    .mnav-btn .mni{font-size:19px;line-height:1;}
+    .mnav-btn.active{color:var(--a1);}
+
+    /* ── MOBILE PANELS ── */
+    .mobile-panels{display:none;position:fixed;top:var(--nav-h);left:0;right:0;bottom:var(--bot-h);overflow:hidden;}
+    .mp{display:none;flex-direction:column;position:absolute;inset:0;overflow:hidden;background:var(--bg);}
+    .mp.vis{display:flex;}
+
+    /* Mobile challenge list */
+    .m-ch-list{overflow-y:auto;padding:8px 12px 16px;-webkit-overflow-scrolling:touch;flex:1;}
+    .m-filter-bar{padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--bd);display:flex;gap:4px;flex-shrink:0;}
+    .m-filter-bar .week-tab{flex:1;text-align:center;padding:6px 4px;}
+
+    /* Mobile editor */
+    .m-editor-actions{background:var(--s1);border-bottom:1px solid var(--bd);padding:8px 12px;gap:8px;display:flex;flex-shrink:0;}
+    .m-editor-actions .btn{flex:1;padding:11px 6px;font-size:13px;text-align:center;}
+
+    /* Mobile output tabs */
+    .out-tabs{display:flex;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;}
+    .out-tab{flex:1;padding:10px;font-size:12px;font-weight:600;text-align:center;cursor:pointer;color:var(--muted);border:none;background:none;font-family:'Space Grotesk',sans-serif;border-bottom:2px solid transparent;transition:all .15s;}
+    .out-tab.active{color:var(--a1);border-bottom-color:var(--a1);}
+    .out-pane{display:none;flex:1;overflow:hidden;flex-direction:column;}
+    .out-pane.vis{display:flex;}
+
+    /* Mobile progress panel */
+    .m-progress-panel{overflow-y:auto;padding:16px;flex:1;-webkit-overflow-scrolling:touch;}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:72px;right:14px;background:var(--s1);border:1px solid var(--bd);border-radius:10px;padding:12px 15px;max-width:min(310px,calc(100vw - 28px));z-index:999;transform:translateY(16px);opacity:0;transition:all .3s ease;pointer-events:none;box-shadow:0 10px 30px #000a;}
+    .toast.show{transform:translateY(0);opacity:1;}
+    .toast.ok{border-color:var(--green);} .toast.err{border-color:var(--red);}
+    .toast-title{font-weight:700;font-size:13px;margin-bottom:3px;}
+    .toast.ok .toast-title{color:var(--green);} .toast.err .toast-title{color:var(--red);}
+    .toast-body{font-size:12px;color:var(--muted2);line-height:1.5;}
+
+    /* ── MODAL ── */
+    .overlay{position:fixed;inset:0;background:#000c;backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:14px;}
+    .overlay.hidden{display:none;}
+    .modal{background:var(--s1);border:1px solid var(--bd);border-radius:14px;width:100%;max-width:600px;max-height:90dvh;overflow-y:auto;padding:22px;box-shadow:0 24px 60px #000;-webkit-overflow-scrolling:touch;}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+    .modal-head h2{font-size:16px;font-weight:700;}
+    .modal-close{width:28px;height:28px;border-radius:6px;background:none;border:1px solid var(--bd);color:var(--muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+    .modal-close:hover{border-color:var(--red);color:var(--red);}
+    .step{padding:14px 0;border-bottom:1px solid var(--bd);}
+    .step:last-child{border-bottom:none;}
+    .step-head{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+    .step-num{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--a2),var(--a1));color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .step-title{font-size:13px;font-weight:700;}
+    .step-desc{font-size:12px;color:var(--muted2);line-height:1.7;margin-bottom:10px;}
+    .step-desc code{color:var(--a3);background:var(--s3);border-radius:3px;padding:1px 4px;font-family:'Space Mono',monospace;}
+    .code-snip{background:#020509;border:1px solid var(--bd);border-radius:7px;padding:10px 12px;font-family:'Space Mono',monospace;font-size:11px;line-height:1.8;overflow-x:auto;color:#c9d8f0;margin-bottom:10px;}
+    .snip-kw{color:var(--a2);} .snip-str{color:var(--green);} .snip-fn{color:var(--a1);} .snip-cm{color:#374151;font-style:italic;} .snip-num{color:var(--yellow);}
+    .env-note{background:#f9731612;border:1px solid #f9731630;border-radius:7px;padding:10px 12px;font-size:12px;color:var(--muted2);margin-bottom:10px;line-height:1.65;}
+    .env-note strong{color:var(--orange);}
+    .input-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);margin-bottom:4px;}
+    .input-field{width:100%;background:var(--bg);border:1px solid var(--bd);border-radius:7px;padding:10px 12px;color:var(--text);font-family:'Space Mono',monospace;font-size:13px;outline:none;margin-bottom:10px;transition:border-color .15s;}
+    .input-field:focus{border-color:var(--a1);}
+    .save-btn{background:linear-gradient(135deg,var(--a2),var(--a1));border:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;padding:11px 20px;border-radius:8px;cursor:pointer;width:100%;transition:opacity .15s;}
+    .save-btn:hover{opacity:.85;}
+
+    /* ── COMPLETION ── */
+    .completion{position:fixed;inset:0;background:var(--bg);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;}
+    .completion.show{display:flex;}
+    .comp-emoji{font-size:64px;margin-bottom:12px;animation:float 1.2s ease-in-out infinite alternate;}
+    @keyframes float{to{transform:translateY(-12px);}}
+    .comp-title{font-size:clamp(26px,8vw,40px);font-weight:700;letter-spacing:-1px;background:linear-gradient(135deg,var(--a3),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
+    .comp-sub{color:var(--muted2);font-size:14px;margin-bottom:22px;}
+    .comp-xp{font-family:'Space Mono',monospace;font-size:clamp(18px,5vw,26px);font-weight:700;color:var(--yellow);background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px 28px;margin-bottom:18px;}
+    .comp-back{background:var(--s1);border:1px solid var(--bd);color:var(--muted2);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;padding:10px 24px;border-radius:8px;cursor:pointer;}
+
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px;}
+
+    /* ── TABLET ── */
+    @media(max-width:960px) and (min-width:641px){
+      .app{grid-template-columns:200px 1fr;}
+      .editor-area{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr);}
+      .instructions{border-right:none;border-bottom:1px solid var(--bd);}
+      .main{grid-template-rows:1fr 150px;}
+    }
+    /* ── MOBILE ── */
+    @media(max-width:640px){
+      .app{display:none!important;}
+      .mobile-nav,.mobile-panels{display:block;}
+      .mobile-panels{display:block;}
+      .db-pill,.progress-wrap{display:none;}
+      .week-tabs{display:none;}
+      .topbar{padding:0 10px;gap:8px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">&lt;HTMLab/&gt;</div>
+  <div class="week-tabs">
+    <button class="week-tab" id="tabW1"  onclick="filterWeek(1)">Week 1</button>
+    <button class="week-tab" id="tabW2"  onclick="filterWeek(2)">Week 2</button>
+    <button class="week-tab" id="tabAll" onclick="filterWeek(0)">All</button>
+  </div>
+  <div class="tb-spacer"></div>
+  <div class="progress-wrap">
+    <div class="progress-meta"><span id="progressLabel">0 / 12</span><span id="progressPct">0%</span></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+  <div class="db-pill"><div class="db-dot" id="dbDot"></div><span id="dbLabel">offline</span></div>
+  <div class="xp-pill">⚡ <span id="xpCount">0</span></div>
+  <button class="btn-setup" onclick="openSetup()">⚙ Setup</button>
+</div>
+
+<!-- DESKTOP APP -->
+<div class="app">
+  <div class="sidebar">
+    <div id="sidebarContent"></div>
+    <div class="sidebar-footer">
+      <div class="student-info">Student: <span id="studentDisplay">—</span></div>
+      <button class="btn-sb" onclick="openSetup()">Connect Supabase</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="editor-area">
+      <div class="instructions" id="instructions"></div>
+      <div class="editor-col">
+        <div class="editor-bar">
+          <div class="file-tab">index.html</div>
+          <div class="editor-btns">
+            <button class="btn btn-reset" onclick="resetCode()">↺ Reset</button>
+            <button class="btn btn-run"   onclick="runCode()">▶ Run</button>
+            <button class="btn btn-check" onclick="checkCode()">✓ Check</button>
+          </div>
+        </div>
+        <textarea id="editor" class="code-ta" spellcheck="false" placeholder="// Write your HTML here...&#10;// Ctrl+Enter = Run · Ctrl+Shift+Enter = Check"></textarea>
+      </div>
+    </div>
+    <div class="bottom-panel">
+      <div class="pane">
+        <div class="pane-bar">🌐 Preview</div>
+        <iframe id="previewD" class="preview-frame"></iframe>
+      </div>
+      <div class="pane">
+        <div class="pane-bar">📋 Console</div>
+        <div class="console-out" id="consoleD">
+          <div class="cl cl-muted">// Welcome to HTMLab — Week 1 &amp; 2</div>
+          <div class="cl cl-muted">// ▶ Run to preview · ✓ Check to validate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE PANELS -->
+<div class="mobile-panels" id="mobilePanels">
+
+  <!-- Challenges -->
+  <div class="mp vis" id="mpA">
+    <div class="m-filter-bar">
+      <button class="week-tab" id="mTabW1"  onclick="filterWeek(1)">Week 1</button>
+      <button class="week-tab" id="mTabW2"  onclick="filterWeek(2)">Week 2</button>
+      <button class="week-tab" id="mTabAll" onclick="filterWeek(0)">All</button>
+    </div>
+    <div class="m-ch-list" id="mChallengeList"></div>
+  </div>
+
+  <!-- Instructions -->
+  <div class="mp" id="mpB">
+    <div style="overflow-y:auto;flex:1;padding:16px;-webkit-overflow-scrolling:touch;" id="mInstructions"></div>
+  </div>
+
+  <!-- Editor -->
+  <div class="mp" id="mpC">
+    <div class="m-editor-actions">
+      <button class="btn btn-reset" onclick="resetCode()">↺</button>
+      <button class="btn btn-run"   onclick="runCode(); goPanel('D')">▶ Run</button>
+      <button class="btn btn-check" onclick="checkCode(); goPanel('D')" style="flex:2;">✓ Check</button>
+    </div>
+    <textarea id="editorM" class="code-ta" spellcheck="false" placeholder="Write your HTML here..."></textarea>
+  </div>
+
+  <!-- Output -->
+  <div class="mp" id="mpD">
+    <div style="display:flex;flex-direction:column;height:100%;">
+      <div class="out-tabs">
+        <button class="out-tab active" id="otP" onclick="switchOut('P')">🌐 Preview</button>
+        <button class="out-tab"        id="otC" onclick="switchOut('C')">📋 Console</button>
+      </div>
+      <div style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+        <div class="out-pane vis" id="outP"><iframe id="previewM" class="preview-frame"></iframe></div>
+        <div class="out-pane"     id="outC"><div class="console-out" id="consoleM"><div class="cl cl-muted">// Run your code to see output here.</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="mp" id="mpE">
+    <div class="m-progress-panel">
+      <div style="font-size:13px;font-weight:700;margin-bottom:14px;color:var(--muted2);">Your Progress</div>
+      <div style="background:var(--s2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px;">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;">OVERALL</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span id="mProgLabel" style="font-size:14px;font-weight:700;">0 / 12</span>
+          <span class="xp-pill">⚡ <span id="mXpCount">0</span></span>
+        </div>
+        <div class="progress-track" style="height:7px;"><div class="progress-fill" id="mProgFill" style="width:0%"></div></div>
+      </div>
+      <div id="mProgList"></div>
+      <div style="margin-top:14px;">
+        <div style="font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);margin-bottom:5px;">Student</div>
+        <div style="font-size:14px;color:var(--a3);margin-bottom:10px;" id="mStudentDisplay">Not connected</div>
+        <button class="save-btn" onclick="openSetup()">⚙ Connect Supabase</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-nav">
+  <div class="mnav-inner">
+    <button class="mnav-btn active" id="mnA" onclick="goPanel('A')"><span class="mni">📚</span><span>Lessons</span></button>
+    <button class="mnav-btn"        id="mnB" onclick="goPanel('B')"><span class="mni">💡</span><span>Guide</span></button>
+    <button class="mnav-btn"        id="mnC" onclick="goPanel('C')"><span class="mni">✏️</span><span>Code</span></button>
+    <button class="mnav-btn"        id="mnD" onclick="goPanel('D')"><span class="mni">🌐</span><span>Output</span></button>
+    <button class="mnav-btn"        id="mnE" onclick="goPanel('E')"><span class="mni">⚡</span><span>XP</span></button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toastTitle"></div>
+  <div class="toast-body"  id="toastBody"></div>
+</div>
+
+<!-- SETUP MODAL -->
+<div class="overlay hidden" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>⚙ Supabase + Netlify Setup</h2>
+      <button class="modal-close" onclick="closeSetup()">✕</button>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-num">1</div><div class="step-title">Create a Supabase Project</div></div>
+      <div class="step-desc">Go to <strong style="color:var(--a3)">supabase.com</strong> → Sign up free → New Project → name it <code>html-lab</code>.</div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-num">2</div><div class="step-title">Create the Progress Table</div></div>
+      <div class="step-desc">Supabase → SQL Editor → New Query → run this:</div>
+      <div class="code-snip"><span class="snip-cm">-- Student progress table</span>
+<span class="snip-kw">CREATE TABLE</span> student_progress (
+  id           <span class="snip-fn">uuid</span> <span class="snip-kw">DEFAULT</span> <span class="snip-fn">gen_random_uuid</span>() <span class="snip-kw">PRIMARY KEY</span>,
+  student_id   <span class="snip-fn">text</span> <span class="snip-kw">NOT NULL</span>,
+  challenge    <span class="snip-fn">text</span> <span class="snip-kw">NOT NULL</span>,
+  week         <span class="snip-fn">integer</span>,
+  completed    <span class="snip-fn">boolean</span> <span class="snip-kw">DEFAULT</span> <span class="snip-num">false</span>,
+  xp_earned    <span class="snip-fn">integer</span> <span class="snip-kw">DEFAULT</span> <span class="snip-num">0</span>,
+  code         <span class="snip-fn">text</span>,
+  completed_at <span class="snip-fn">timestamptz</span>,
+  created_at   <span class="snip-fn">timestamptz</span> <span class="snip-kw">DEFAULT</span> <span class="snip-fn">now</span>(),
+  <span class="snip-kw">UNIQUE</span>(student_id, challenge)
+);
+<span class="snip-kw">ALTER TABLE</span> student_progress <span class="snip-kw">ENABLE ROW LEVEL SECURITY</span>;
+<span class="snip-kw">CREATE POLICY</span> <span class="snip-str">"classroom_access"</span> <span class="snip-kw">ON</span> student_progress
+  <span class="snip-kw">FOR ALL USING</span> (<span class="snip-num">true</span>) <span class="snip-kw">WITH CHECK</span> (<span class="snip-num">true</span>);</div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-num">3</div><div class="step-title">Set Netlify Environment Variables</div></div>
+      <div class="env-note"><strong>⚠ Never paste API keys into this HTML file.</strong><br>Set them in Netlify → Site Settings → Environment Variables. They stay server-side only.</div>
+      <div class="code-snip"><span class="snip-cm"># Netlify → Site Settings → Environment Variables</span>
+SUPABASE_URL      = https://xxxx.supabase.co
+SUPABASE_ANON_KEY = eyJhbGci...</div>
+      <div class="step-desc" style="margin-top:8px;">Get both from Supabase → <strong style="color:var(--a3)">Project Settings → API</strong>. Then redeploy your Netlify site.</div>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-num">4</div><div class="step-title">Enter Your Student ID</div></div>
+      <div class="step-desc">Each student enters their own name or roll number. No API keys needed on the student side — they stay hidden on the server.</div>
+      <div class="input-label">STUDENT_ID</div>
+      <input class="input-field" id="studentIdInput" placeholder="e.g. john_doe or student_14" />
+      <button class="save-btn" onclick="connectStudent()">Save & Connect</button>
+    </div>
+    <div class="step">
+      <div class="step-head"><div class="step-num">5</div><div class="step-title">Teacher Leaderboard</div></div>
+      <div class="code-snip"><span class="snip-kw">SELECT</span> student_id,
+  <span class="snip-fn">COUNT</span>(*) <span class="snip-kw">FILTER</span>(<span class="snip-kw">WHERE</span> completed) <span class="snip-kw">AS</span> done,
+  <span class="snip-fn">SUM</span>(xp_earned) <span class="snip-kw">AS</span> total_xp,
+  <span class="snip-fn">MAX</span>(completed_at) <span class="snip-kw">AS</span> last_seen
+<span class="snip-kw">FROM</span> student_progress
+<span class="snip-kw">GROUP BY</span> student_id
+<span class="snip-kw">ORDER BY</span> total_xp <span class="snip-kw">DESC</span>;</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETION -->
+<div class="completion" id="completion">
+  <div class="comp-emoji">🏆</div>
+  <div class="comp-title">Lab Complete!</div>
+  <div class="comp-sub">All Week 1 &amp; 2 challenges done. Onwards to Week 3!</div>
+  <div class="comp-xp">⚡ +<span id="finalXP">0</span> XP Total</div>
+  <button class="comp-back" onclick="document.getElementById('completion').classList.remove('show')">← Back to Lab</button>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+const CHALLENGES=[{id:"w1c1",week:1,xp:40,label:"What is HTML?",title:"What is HTML?",desc:"HTML stands for HyperText Markup Language. It is the standard language for creating web pages. HTML is not a programming language — it is a markup language that uses tags to describe structure and content.",concept:{head:"Key Concept",body:"Think of a webpage as a human body.\nHTML = skeleton (structure)\nCSS = skin & clothes (appearance)\nJavaScript = brain (behaviour)\n\nHTML alone makes a plain but fully structured page."},tip:{head:"Remember",body:"HTML files are saved with the .html extension. The browser reads the file and displays it as a webpage. The browser never shows the tags — only the content between them."},example:`<span class="hl-cmnt">&lt;!-- HTML gives content meaning --&gt;</span>\n<span class="hl-tag">&lt;h1&gt;</span><span class="hl-text">This is a heading</span><span class="hl-tag">&lt;/h1&gt;</span>\n<span class="hl-tag">&lt;p&gt;</span><span class="hl-text">This is a paragraph.</span><span class="hl-tag">&lt;/p&gt;</span>\n<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"https://google.com"</span><span class="hl-tag">&gt;</span><span class="hl-text">A link</span><span class="hl-tag">&lt;/a&gt;</span>`,tasks:["Write a comment that says 'My first HTML'","Add an <h1> tag with your name inside it","Add a <p> tag with one sentence about yourself"],starter:"<!-- Start here -->\n",checks:[{test:c=>/<!--[^>]+-->/.test(c),msg:"✓ HTML comment found"},{test:c=>/<h1>[^<]+<\/h1>/i.test(c),msg:"✓ <h1> heading with content"},{test:c=>/<p>[^<]+<\/p>/i.test(c),msg:"✓ <p> paragraph found"}]},{id:"w1c2",week:1,xp:40,label:"Tags vs Elements",title:"Tags, Elements & Attributes",desc:"A tag is the label in angle brackets: <p>. An element is the full unit: opening tag + content + closing tag. An attribute adds extra information inside the opening tag.",warning:{head:"Common Mistake",body:"Forgetting the / in closing tags is the most common beginner error.\n\n<p>text<p>  ← WRONG\n<p>text</p>  ← CORRECT"},concept:{head:"Anatomy",body:"<tagname attribute=\"value\">content</tagname>\n\nOpening tag starts it. Closing tag (/) ends it.\nContent appears on screen. Attribute modifies the element."},example:`<span class="hl-tag">&lt;a</span> <span class="hl-attr">href</span>=<span class="hl-val">"https://example.com"</span><span class="hl-tag">&gt;</span><span class="hl-text">Click me</span><span class="hl-tag">&lt;/a&gt;</span>\n<span class="hl-cmnt">&lt;!-- attr: href | value: "https://example.com" --&gt;</span>\n<span class="hl-tag">&lt;img</span> <span class="hl-attr">src</span>=<span class="hl-val">"photo.jpg"</span> <span class="hl-attr">alt</span>=<span class="hl-val">"A photo"</span><span class="hl-tag">&gt;</span>`,tasks:["Write an <a> with href pointing to https://google.com","Give the link the text 'Visit Google'","Add a <p> below it with any text"],starter:"<!-- Practice tags, elements, attributes -->\n",checks:[{test:c=>/<a\s[^>]*href\s*=\s*["'][^"']+["'][^>]*>/i.test(c),msg:"✓ <a> with href found"},{test:c=>/<a[^>]*>[^<]+<\/a>/i.test(c),msg:"✓ <a> has link text"},{test:c=>/<p>[^<]+<\/p>/i.test(c),msg:"✓ <p> found"}]},{id:"w1c3",week:1,xp:50,label:"Static vs Dynamic",title:"Static vs Dynamic Websites",desc:"A static website serves the same HTML to every visitor. A dynamic website generates content on the fly. Right now you're learning to build static pages — the foundation of all web development.",concept:{head:"Examples",body:"Static: portfolio, brochure, docs\nDynamic: Facebook, Gmail, Amazon\n\nEven dynamic sites are HTML — the difference is WHERE it's created: a file on disk vs a server generating it live."},tip:{head:"Foundation",body:"Static HTML is the foundation. Every framework (React, Vue, Angular) still produces HTML in the end. Master this first."},example:`<span class="hl-cmnt">&lt;!-- STATIC: same for every visitor --&gt;</span>\n<span class="hl-tag">&lt;h1&gt;</span><span class="hl-text">Welcome to My Portfolio</span><span class="hl-tag">&lt;/h1&gt;</span>\n<span class="hl-cmnt">&lt;!-- DYNAMIC: server fills in the name --&gt;</span>\n<span class="hl-tag">&lt;h1&gt;</span><span class="hl-text">Welcome back, John!</span><span class="hl-tag">&lt;/h1&gt;</span>`,tasks:["Create an <h1>: 'My Static Page'","Add a <p> explaining what a static page is","Add a <p> explaining what a dynamic page is","Label each section with a comment"],starter:"<!-- Static vs Dynamic -->\n",checks:[{test:c=>/<h1>[^<]+<\/h1>/i.test(c),msg:"✓ <h1> found"},{test:c=>(c.match(/<p>[^<]+<\/p>/gi)||[]).length>=2,msg:"✓ Two <p> elements"},{test:c=>(c.match(/<!--/g)||[]).length>=2,msg:"✓ Two comments found"}]},{id:"w1c4",week:1,xp:60,label:"Frontend vs Backend",title:"Frontend vs Backend",desc:"Frontend is everything the user sees in the browser. Backend is everything on the server. HTML, CSS, and JavaScript are frontend languages. You are learning frontend right now.",concept:{head:"Restaurant Analogy",body:"Frontend = dining room (menu, tables, ambiance)\nBackend = kitchen (chef, ingredients, cooking)\n\nThe customer only sees the dining room. The kitchen makes it work — invisibly."},tip:{head:"Your Path",body:"HTML (structure) → CSS (style) → JavaScript (behaviour) = Frontend\nThen: Node.js / Python + Databases = Backend"},example:`<span class="hl-cmnt">&lt;!-- Frontend: runs in the browser --&gt;</span>\n<span class="hl-tag">&lt;button&gt;</span><span class="hl-text">Click Me</span><span class="hl-tag">&lt;/button&gt;</span>\n<span class="hl-tag">&lt;p&gt;</span><span class="hl-text">This is frontend HTML.</span><span class="hl-tag">&lt;/p&gt;</span>`,tasks:["Comment: 'Frontend Section'","<h2>: Frontend Technologies","<p> listing HTML, CSS, JavaScript","<h2>: Backend Technologies","<p> listing any backend tech"],starter:"<!-- Frontend vs Backend -->\n",checks:[{test:c=>/<!--[^>]*Frontend[^>]*-->/i.test(c),msg:"✓ Comment mentioning Frontend"},{test:c=>(c.match(/<h2>[^<]+<\/h2>/gi)||[]).length>=2,msg:"✓ Two <h2> elements"},{test:c=>/HTML/i.test(c)&&/CSS/i.test(c),msg:"✓ HTML and CSS mentioned"}]},{id:"w2c1",week:2,xp:50,label:"DOCTYPE",title:"The DOCTYPE Declaration",desc:"Every HTML document must begin with <!DOCTYPE html>. It tells the browser to use modern HTML5 rules. Without it, browsers enter Quirks Mode and your page can look broken.",concept:{head:"Why It Matters",body:"Browsers have a 'Quirks Mode' for ancient websites. <!DOCTYPE html> disables it and enables Standards Mode — where all modern rules apply correctly."},tip:{head:"Quick Rule",body:"<!DOCTYPE html> is always Line 1. Always. No exceptions. Case-insensitive but always written uppercase by convention."},example:`<span class="hl-dt">&lt;!DOCTYPE html&gt;</span>\n<span class="hl-tag">&lt;html</span> <span class="hl-attr">lang</span>=<span class="hl-val">"en"</span><span class="hl-tag">&gt;</span>\n  <span class="hl-cmnt">&lt;!-- page content --&gt;</span>\n<span class="hl-tag">&lt;/html&gt;</span>`,tasks:["Write <!DOCTYPE html> as the very first line","Add <html lang=\"en\"> below it","Close with </html>","Add a comment explaining what DOCTYPE does"],starter:"",checks:[{test:c=>/^\s*<!DOCTYPE\s+html>/i.test(c),msg:"✓ DOCTYPE is the first line"},{test:c=>/<html[^>]*lang\s*=\s*["']en["']/i.test(c),msg:"✓ <html lang=\"en\"> found"},{test:c=>/<\/html>/i.test(c),msg:"✓ </html> closing tag"},{test:c=>/<!--[^>]+-->/.test(c),msg:"✓ Explanatory comment found"}]},{id:"w2c2",week:2,xp:60,label:"The <head>",title:"The <head> Element",desc:"The <head> contains metadata — information about the page that is invisible to users. The only exception is <title>, which shows in the browser tab and search results.",concept:{head:"What Goes in <head>?",body:"<meta charset=\"UTF-8\"> — support special chars\n<meta name=\"viewport\"> — mobile scaling\n<title> — browser tab + search snippet\n<link> — connect CSS files\n<meta name=\"description\"> — search summary"},warning:{head:"Do Not Confuse",body:"<head> (invisible metadata container) ≠ <h1>,<h2> (visible headings).\n\n<head> is invisible. Heading tags always go inside <body>."},example:`<span class="hl-tag">&lt;head&gt;</span>\n  <span class="hl-tag">&lt;meta</span> <span class="hl-attr">charset</span>=<span class="hl-val">"UTF-8"</span><span class="hl-tag">&gt;</span>\n  <span class="hl-tag">&lt;meta</span> <span class="hl-attr">name</span>=<span class="hl-val">"viewport"</span> <span class="hl-attr">content</span>=<span class="hl-val">"width=device-width, initial-scale=1.0"</span><span class="hl-tag">&gt;</span>\n  <span class="hl-tag">&lt;title&gt;</span><span class="hl-text">My Page</span><span class="hl-tag">&lt;/title&gt;</span>\n<span class="hl-tag">&lt;/head&gt;</span>`,tasks:["Add a <head> element","<meta charset=\"UTF-8\"> inside it","Viewport <meta> tag","<title> with your name","Close </head>"],starter:'<!DOCTYPE html>\n<html lang="en">\n\n  <!-- Add your <head> here -->\n\n</html>',checks:[{test:c=>/<head>/i.test(c)&&/<\/head>/i.test(c),msg:"✓ <head> opened and closed"},{test:c=>/charset\s*=\s*["']UTF-8["']/i.test(c),msg:"✓ charset meta found"},{test:c=>/viewport/i.test(c),msg:"✓ viewport meta found"},{test:c=>/<title>[^<]+<\/title>/i.test(c),msg:"✓ <title> with content"}]},{id:"w2c3",week:2,xp:60,label:"The <body>",title:"The <body> Element",desc:"Everything the user sees belongs inside <body>. Text, images, buttons, links, forms — all of it. The browser renders the body onto the page.",concept:{head:"Head vs Body",body:"<head> = backstage crew (invisible)\n<body> = the stage (visible to audience)\n\nThe backstage makes the show possible but stays hidden. The stage is what the audience experiences."},tip:{head:"Good Habit",body:"Always write <body> immediately after </head>. Never leave content floating between them."},example:`<span class="hl-tag">&lt;body&gt;</span>\n  <span class="hl-cmnt">&lt;!-- All visible content here --&gt;</span>\n  <span class="hl-tag">&lt;h1&gt;</span><span class="hl-text">Hello, World!</span><span class="hl-tag">&lt;/h1&gt;</span>\n  <span class="hl-tag">&lt;p&gt;</span><span class="hl-text">This text appears on screen.</span><span class="hl-tag">&lt;/p&gt;</span>\n<span class="hl-tag">&lt;/body&gt;</span>`,tasks:["Add <body> after </head>","<h1> with your full name","<p> with your favourite subject","Another <p> with your HTML goal","Close </body> before </html>"],starter:'<!DOCTYPE html>\n<html lang="en">\n  <head>\n    <meta charset="UTF-8">\n    <title>My Page</title>\n  </head>\n\n  <!-- Add <body> below -->\n\n</html>',checks:[{test:c=>/<body>/i.test(c)&&/<\/body>/i.test(c),msg:"✓ <body> opened and closed"},{test:c=>/<h1>[^<]+<\/h1>/i.test(c),msg:"✓ <h1> with content"},{test:c=>(c.match(/<p>[^<]+<\/p>/gi)||[]).length>=2,msg:"✓ Two <p> elements"},{test:c=>/<\/body>\s*<\/html>/i.test(c),msg:"✓ </body> before </html>"}]},{id:"w2c4",week:2,xp:50,label:"Comments",title:"HTML Comments",desc:"Comments are developer notes the browser ignores completely. They never appear on screen. Use them to explain sections, leave reminders, and temporarily disable code.",concept:{head:"When to Comment",body:"• Before every major section\n• When code is complex\n• To remind yourself what it does\n• To disable code during testing\n\nBuild this habit now. Your future self will thank you."},tip:{head:"Multi-Line",body:"<!--\n  This spans\n  multiple lines\n-->\n\nUseful for longer notes or disabling code blocks."},example:`<span class="hl-cmnt">&lt;!-- Page header --&gt;</span>\n<span class="hl-tag">&lt;h1&gt;</span><span class="hl-text">My Website</span><span class="hl-tag">&lt;/h1&gt;</span>\n<span class="hl-cmnt">&lt;!--\n  Bio section\n  Updated 2024\n--&gt;</span>\n<span class="hl-tag">&lt;p&gt;</span><span class="hl-text">Hello!</span><span class="hl-tag">&lt;/p&gt;</span>`,tasks:["Comment above <h1> labelling the header","Comment above a <p> explaining the content","Write a multi-line comment","3 total comments minimum"],starter:'<!DOCTYPE html>\n<html lang="en">\n  <head>\n    <meta charset="UTF-8">\n    <title>Comments</title>\n  </head>\n  <body>\n    <h1>Learning Comments</h1>\n    <p>Comments are invisible to users.</p>\n    <p>The browser ignores all comments.</p>\n  </body>\n</html>',checks:[{test:c=>(c.match(/<!--/g)||[]).length>=3,msg:"✓ At least 3 comments"},{test:c=>/<!--[\s\S]*\n[\s\S]*-->/.test(c),msg:"✓ Multi-line comment found"},{test:c=>/<!--[^>]*(?:header|h1)[^>]*-->/i.test(c),msg:"✓ Comment labelling header"}]},{id:"w2c5",week:2,xp:60,label:"Attributes",title:"Attributes & the lang Attribute",desc:"Attributes live inside opening tags and provide extra information. The lang attribute on <html> is critical for accessibility — it tells screen readers and search engines the page language.",warning:{head:"Accessibility Matters",body:"Without lang=\"en\", a screen reader might use the wrong pronunciation engine — making your page incomprehensible to visually impaired users."},concept:{head:"Syntax Rules",body:"• Always inside the opening tag\n• Always name=\"value\" format\n• Values always in quotes\n• Multiple attributes separated by spaces\n• Never in the closing tag"},example:`<span class="hl-tag">&lt;html</span> <span class="hl-attr">lang</span>=<span class="hl-val">"en"</span><span class="hl-tag">&gt;</span>\n<span class="hl-tag">&lt;meta</span> <span class="hl-attr">name</span>=<span class="hl-val">"description"</span>\n      <span class="hl-attr">content</span>=<span class="hl-val">"A page about attributes"</span><span class="hl-tag">&gt;</span>`,tasks:["Add lang=\"en\" to <html>","Add description meta with meaningful content","Add a <p> with a title attribute","Comment explaining what lang does"],starter:'<!DOCTYPE html>\n<html>\n  <head>\n    <meta charset="UTF-8">\n    <title>Attributes</title>\n  </head>\n  <body>\n    <h1>Attributes Matter</h1>\n    <p>Small additions to tags make a big difference.</p>\n  </body>\n</html>',checks:[{test:c=>/lang\s*=\s*["']en["']/i.test(c),msg:"✓ lang=\"en\" on <html>"},{test:c=>/name\s*=\s*["']description["'][^>]*content/i.test(c),msg:"✓ description meta found"},{test:c=>/title\s*=\s*["'][^"']+["']/.test(c),msg:"✓ title attribute found"},{test:c=>/<!--[^>]+-->/.test(c),msg:"✓ Explanatory comment found"}]},{id:"w2c6",week:2,xp:60,label:"Void Elements",title:"Self-Closing (Void) Elements",desc:"Some HTML elements cannot contain content so they have no closing tag. These are void elements. Stop writing </br> or </img> — those are errors.",concept:{head:"Why No Closing Tag?",body:"A closing tag wraps content. <p>content</p> makes sense. But <br> is just a line break — nothing to wrap. Same for <img>, <input>, <meta>, <link>, <hr>."},tip:{head:"HTML5 Note",body:"Both <br> and <br/> are valid HTML5. The slash is from XHTML. In modern HTML5, just write <br>."},example:`<span class="hl-tag">&lt;br&gt;</span>  <span class="hl-cmnt">&lt;!-- line break --&gt;</span>\n<span class="hl-tag">&lt;hr&gt;</span>  <span class="hl-cmnt">&lt;!-- horizontal rule --&gt;</span>\n<span class="hl-tag">&lt;img</span> <span class="hl-attr">src</span>=<span class="hl-val">"photo.jpg"</span> <span class="hl-attr">alt</span>=<span class="hl-val">"A photo"</span><span class="hl-tag">&gt;</span>\n<span class="hl-tag">&lt;input</span> <span class="hl-attr">type</span>=<span class="hl-val">"text"</span> <span class="hl-attr">placeholder</span>=<span class="hl-val">"Type here"</span><span class="hl-tag">&gt;</span>`,tasks:["Add <br> between two lines of text","Add <hr> as a divider","Add <img> with src and alt","Add <input type=\"text\"> with placeholder","Comment labelling void elements section"],starter:'<!DOCTYPE html>\n<html lang="en">\n  <head>\n    <meta charset="UTF-8">\n    <title>Void Elements</title>\n  </head>\n  <body>\n    <h1>Self-Closing Elements</h1>\n    <!-- Add void elements below -->\n  </body>\n</html>',checks:[{test:c=>/<br>/i.test(c),msg:"✓ <br> found"},{test:c=>/<hr>/i.test(c),msg:"✓ <hr> found"},{test:c=>/<img[^>]*src\s*=[^>]*alt\s*=/i.test(c),msg:"✓ <img> with src and alt"},{test:c=>/<input[^>]*type\s*=\s*["']text["']/i.test(c),msg:"✓ <input type=\"text\"> found"}]},{id:"w2c7",week:2,xp:75,label:"Nesting",title:"Nesting & Parent-Child Relationships",desc:"HTML elements nest inside each other in a strict hierarchy. Elements inside others are children; containing elements are parents. There are rules about what can go inside what.",concept:{head:"Block vs Inline",body:"Block elements (div, p, h1): new line, full width.\nInline elements (span, strong, a): in text flow.\n\nNEVER place a block element inside an inline element."},warning:{head:"Never Do This",body:"<p>Text <p>Inside</p></p>  ← <p> inside <p>\n<span><div>Block</div></span>  ← block in inline\n\nBrowsers silently 'fix' these in unexpected ways."},example:`<span class="hl-tag">&lt;div&gt;</span>\n  <span class="hl-tag">&lt;h2&gt;</span><span class="hl-text">Section</span><span class="hl-tag">&lt;/h2&gt;</span>\n  <span class="hl-tag">&lt;p&gt;</span><span class="hl-text">Text with </span><span class="hl-tag">&lt;strong&gt;</span><span class="hl-text">bold</span><span class="hl-tag">&lt;/strong&gt;</span><span class="hl-text"> inside.</span><span class="hl-tag">&lt;/p&gt;</span>\n<span class="hl-tag">&lt;/div&gt;</span>`,tasks:["Create a <div> container","Inside it: <h2> heading","Inside same <div>: <p> with <strong> text","Second <div> with its own <p>","Proper 2-space indentation throughout"],starter:'<!DOCTYPE html>\n<html lang="en">\n  <head>\n    <meta charset="UTF-8">\n    <title>Nesting</title>\n  </head>\n  <body>\n    <!-- Build nested structure here -->\n  </body>\n</html>',checks:[{test:c=>(c.match(/<div>/gi)||[]).length>=2,msg:"✓ At least 2 <div> elements"},{test:c=>/<h2>[^<]+<\/h2>/i.test(c),msg:"✓ <h2> heading found"},{test:c=>/<strong>[^<]+<\/strong>/i.test(c),msg:"✓ <strong> inside <p>"},{test:c=>/  <[a-z]/m.test(c),msg:"✓ Indentation detected"}]},{id:"w2c8",week:2,xp:125,label:"Full Boilerplate",title:"Complete Boilerplate — From Memory",desc:"Final boss of Week 2. Write a complete valid HTML5 boilerplate from scratch. No starter code. Every element must be present, correctly nested, and commented.",concept:{head:"Why Memorise This?",body:"Professionals type this structure automatically before anything else. Muscle memory for the boilerplate means you focus on content — not scaffolding."},tip:{head:"Checklist",body:"1. <!DOCTYPE html>\n2. <html lang=\"en\">\n3. <head>: charset + viewport + title\n4. </head>\n5. <body>: element + comment\n6. </body>\n7. </html>"},example:`<span class="hl-dt">&lt;!DOCTYPE html&gt;</span>\n<span class="hl-tag">&lt;html</span> <span class="hl-attr">lang</span>=<span class="hl-val">"en"</span><span class="hl-tag">&gt;</span>\n  <span class="hl-tag">&lt;head&gt;</span>\n    <span class="hl-tag">&lt;meta</span> <span class="hl-attr">charset</span>=<span class="hl-val">"UTF-8"</span><span class="hl-tag">&gt;</span>\n    <span class="hl-tag">&lt;meta</span> <span class="hl-attr">name</span>=<span class="hl-val">"viewport"</span> <span class="hl-attr">content</span>=<span class="hl-val">"width=device-width, initial-scale=1.0"</span><span class="hl-tag">&gt;</span>\n    <span class="hl-tag">&lt;title&gt;</span><span class="hl-text">Page Title</span><span class="hl-tag">&lt;/title&gt;</span>\n  <span class="hl-tag">&lt;/head&gt;</span>\n  <span class="hl-tag">&lt;body&gt;</span>\n    <span class="hl-cmnt">&lt;!-- content --&gt;</span>\n  <span class="hl-tag">&lt;/body&gt;</span>\n<span class="hl-tag">&lt;/html&gt;</span>`,tasks:["DOCTYPE on line 1","<html lang=\"en\">","<head> with charset + viewport + title","<body> with heading + paragraph","3 comments minimum","All tags closed and nested correctly"],starter:"",checks:[{test:c=>/^\s*<!DOCTYPE\s+html>/i.test(c),msg:"✓ DOCTYPE on first line"},{test:c=>/lang\s*=\s*["']en["']/i.test(c),msg:"✓ lang=\"en\" present"},{test:c=>/charset\s*=\s*["']UTF-8["']/i.test(c),msg:"✓ charset UTF-8"},{test:c=>/viewport/i.test(c),msg:"✓ viewport meta"},{test:c=>/<title>[^<]+<\/title>/i.test(c),msg:"✓ <title> with content"},{test:c=>/<body>/i.test(c)&&/<\/body>/i.test(c),msg:"✓ <body> opened and closed"},{test:c=>/<h[1-6]>[^<]+<\/h[1-6]>/i.test(c),msg:"✓ Heading in body"},{test:c=>(c.match(/<!--/g)||[]).length>=3,msg:"✓ 3 comments present"},{test:c=>/<\/html>/i.test(c),msg:"✓ Document closed"}]}];
+
+// ══════════════════════════════════════
+// STATE
+// ══════════════════════════════════════
+let cur=0, completed=new Set(), xp=0, studentId=null, wf=0;
+const PROXY='/.netlify/functions/supabase';
+const saved=(()=>{try{return JSON.parse(localStorage.getItem('htmlab_v4')||'{}')}catch{return{}}})();
+if(saved.completed)completed=new Set(saved.completed);
+if(saved.xp)xp=saved.xp;
+if(saved.studentId){
+  studentId=saved.studentId;
+  setStudentDisplay(studentId);
+  document.getElementById('studentIdInput').value=studentId;
+  loadRemoteProgress();
+}
+
+function persist(){localStorage.setItem('htmlab_v4',JSON.stringify({completed:[...completed],xp,studentId}));}
+function setStudentDisplay(v){['studentDisplay','mStudentDisplay'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=v;});}
+
+// ══════════════════════════════════════
+// MOBILE PANELS
+// ══════════════════════════════════════
+function goPanel(key){
+  'ABCDE'.split('').forEach(k=>{
+    document.getElementById('mp'+k).classList.remove('vis');
+    document.getElementById('mn'+k).classList.remove('active');
+  });
+  document.getElementById('mp'+key).classList.add('vis');
+  document.getElementById('mn'+key).classList.add('active');
+  // Sync code editors when opening editor panel
+  if(key==='C') document.getElementById('editorM').value=document.getElementById('editor').value;
+}
+
+function switchOut(key){
+  ['P','C'].forEach(k=>{
+    document.getElementById('ot'+k).classList.remove('active');
+    document.getElementById('out'+k).classList.remove('vis');
+  });
+  document.getElementById('ot'+key).classList.add('active');
+  document.getElementById('out'+key).classList.add('vis');
+}
+
+// ══════════════════════════════════════
+// SUPABASE
+// ══════════════════════════════════════
+async function dbCall(path,method,body,params){
+  try{
+    const r=await fetch(PROXY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({path,method,body,params})});
+    if(!r.ok)return null;
+    return r.json();
+  }catch{return null;}
+}
+async function loadRemoteProgress(){
+  const rows=await dbCall('student_progress','GET',null,{student_id:`eq.${studentId}`,completed:'eq.true',select:'challenge,xp_earned'});
+  if(!Array.isArray(rows))return;
+  rows.forEach(r=>completed.add(r.challenge));
+  xp=rows.reduce((s,r)=>s+(r.xp_earned||0),0);
+  setXP(xp); updateDbStatus(true); persist(); renderSidebar(); updateProgress();
+}
+async function saveProgress(id,code,xpE,week){
+  if(!studentId)return;
+  await dbCall('student_progress','POST',{student_id:studentId,challenge:id,week,completed:true,xp_earned:xpE,code,attempts:1,completed_at:new Date().toISOString()});
+}
+function updateDbStatus(on){
+  document.getElementById('dbDot').className='db-dot'+(on?' on':'');
+  document.getElementById('dbLabel').textContent=on?'supabase: on':'offline';
+}
+async function connectStudent(){
+  const val=document.getElementById('studentIdInput').value.trim();
+  if(!val){showToast('err','Missing','Please enter a student ID.');return;}
+  studentId=val; setStudentDisplay(val); persist();
+  const test=await dbCall('student_progress','GET',null,{limit:'1'});
+  if(Array.isArray(test)){
+    updateDbStatus(true);
+    showToast('ok','Connected!',`Saving progress for "${studentId}".`);
+    closeSetup(); await loadRemoteProgress();
+  } else {
+    updateDbStatus(false);
+    showToast('err','Cannot reach Supabase','Check SUPABASE_URL + SUPABASE_ANON_KEY in Netlify env vars, then redeploy.');
+  }
+}
+
+// ══════════════════════════════════════
+// WEEK FILTER
+// ══════════════════════════════════════
+function filterWeek(w){
+  wf=w;
+  ['W1','W2','All'].forEach(s=>{
+    ['tab','mTab'].forEach(p=>{const e=document.getElementById(p+s);if(e)e.className='week-tab';});
+  });
+  const a1='week-tab active-w1',a2='week-tab active-w2';
+  if(w===1)['tabW1','mTabW1'].forEach(id=>{const e=document.getElementById(id);if(e)e.className=a1;});
+  else if(w===2)['tabW2','mTabW2'].forEach(id=>{const e=document.getElementById(id);if(e)e.className=a2;});
+  else['tabAll','mTabAll'].forEach(id=>{const e=document.getElementById(id);if(e)e.className=a2;});
+  renderSidebar();
+  const vis=CHALLENGES.filter(c=>w===0||c.week===w);
+  if(!vis.find(c=>c.id===CHALLENGES[cur].id))loadChallenge(CHALLENGES.indexOf(vis[0]));
+}
+
+// ══════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════
+function renderSidebar(){
+  let h='';
+  [1,2].forEach(w=>{
+    if(wf!==0&&wf!==w)return;
+    h+=`<div class="sidebar-week"><div class="sidebar-week-label ${w===1?'w1':'w2'}">${w===1?'🌍':'🔧'} Week ${w}</div>`;
+    CHALLENGES.filter(c=>c.week===w).forEach(c=>{
+      const i=CHALLENGES.indexOf(c),done=completed.has(c.id),act=i===cur;
+      h+=`<div class="ch-item ${done?'done':''} ${act?'active':''}" onclick="loadChallenge(${i})"><div class="ch-num">${done?'✓':i+1}</div><span>${c.label}</span></div>`;
+    });
+    h+=`</div>`;
+  });
+  document.getElementById('sidebarContent').innerHTML=h;
+  document.getElementById('mChallengeList').innerHTML=h;
+  renderProgPanel();
+}
+
+function renderProgPanel(){
+  document.getElementById('mProgList').innerHTML=CHALLENGES.map(c=>{
+    const done=completed.has(c.id),i=CHALLENGES.indexOf(c);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px;">
+      <div style="width:18px;height:18px;border-radius:50%;background:${done?'var(--green)':'var(--s3)'};color:${done?'#000':'var(--muted)'};display:flex;align-items:center;justify-content:center;font-size:9px;font-family:'Space Mono',monospace;font-weight:700;flex-shrink:0;">${done?'✓':i+1}</div>
+      <span style="color:${done?'var(--green)':'var(--muted2)'};">${c.label}</span>
+      <span style="margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;color:${done?'var(--yellow)':'var(--muted)'};">${done?'+'+c.xp+' XP':c.xp+' XP'}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderInstr(ch){
+  const wc=ch.week===1?'tag-w1':'tag-w2';
+  let co='';
+  ['concept','warning','tip'].forEach(k=>{
+    if(!ch[k])return;
+    const icons={concept:'💡',warning:'⚠',tip:'✅'},cls={concept:'callout-concept',warning:'callout-warning',tip:'callout-tip'};
+    co+=`<div class="callout ${cls[k]}"><strong>${icons[k]} ${ch[k].head}</strong>${ch[k].body.replace(/\n/g,'<br>')}</div>`;
+  });
+  const ts=ch.tasks.map(t=>`<div class="task-row"><div class="task-dot"></div><span>${t}</span></div>`).join('');
+  const html=`<div class="ch-meta"><span class="tag-pill ${wc}">Week ${ch.week}</span><span class="tag-pill tag-xp">⚡ ${ch.xp} XP</span></div><div class="ch-title">${ch.title}</div><div class="ch-desc">${ch.desc}</div>${co}<div class="example-block">${ch.example}</div><div class="tasks-label">Your Tasks</div>${ts}`;
+  document.getElementById('instructions').innerHTML=html;
+  document.getElementById('mInstructions').innerHTML=html;
+}
+
+function loadChallenge(i){
+  cur=i; const ch=CHALLENGES[i];
+  renderSidebar(); renderInstr(ch);
+  document.getElementById('editor').value=ch.starter;
+  document.getElementById('editorM').value=ch.starter;
+  clearConsole();
+  clog('info',`// Challenge ${i+1}: ${ch.title}`);
+  clog('info','// ▶ Run to preview · ✓ Check to validate');
+  if(window.innerWidth<=640)goPanel('B'); // go to guide on mobile after selecting
+}
+
+function updateProgress(){
+  const total=CHALLENGES.length,done=completed.size,pct=Math.round(done/total*100);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('mProgFill').style.width=pct+'%';
+  document.getElementById('progressLabel').textContent=`${done} / ${total}`;
+  document.getElementById('progressPct').textContent=pct+'%';
+  document.getElementById('mProgLabel').textContent=`${done} / ${total} challenges`;
+}
+function setXP(v){
+  document.getElementById('xpCount').textContent=v;
+  document.getElementById('mXpCount').textContent=v;
+}
+
+// ══════════════════════════════════════
+// EDITOR — sync mobile ↔ desktop
+// ══════════════════════════════════════
+const edD=document.getElementById('editor'), edM=document.getElementById('editorM');
+edD.addEventListener('input',()=>edM.value=edD.value);
+edM.addEventListener('input',()=>edD.value=edM.value);
+function getCode(){return window.innerWidth<=640?edM.value:edD.value;}
+
+function runCode(){
+  const c=getCode();
+  document.getElementById('previewD').srcdoc=c;
+  document.getElementById('previewM').srcdoc=c;
+  clog('muted','// Preview updated.');
+}
+function resetCode(){
+  const v=CHALLENGES[cur].starter;
+  edD.value=edM.value=v;
+  clog('warn','// Editor reset.');
+}
+async function checkCode(){
+  const code=getCode(),ch=CHALLENGES[cur];
+  clearConsole(); runCode();
+  clog('info',`// Checking: ${ch.title}...`);
+  let ok=true;
+  ch.checks.forEach(chk=>{
+    const pass=chk.test(code);
+    clog(pass?'ok':'fail',pass?chk.msg:chk.msg.replace('✓','✗'));
+    if(!pass)ok=false;
+  });
+  if(ok){
+    const isNew=!completed.has(ch.id);
+    if(isNew){completed.add(ch.id);xp+=ch.xp;setXP(xp);await saveProgress(ch.id,code,ch.xp,ch.week);persist();}
+    updateProgress(); renderSidebar();
+    clog('ok',`// ✅ Passed! ${isNew?'+'+ch.xp+' XP':'Already done.'}`);
+    showToast('ok','✅ Passed!',isNew?`+${ch.xp} XP earned!`:'Already completed!');
+    if(completed.size===CHALLENGES.length)setTimeout(()=>{document.getElementById('finalXP').textContent=xp;document.getElementById('completion').classList.add('show');},900);
+  } else {
+    clog('fail','// Some checks failed — keep going!');
+    showToast('err','Not quite!','Read the console for details.');
+  }
+}
+
+// ══════════════════════════════════════
+// CONSOLE
+// ══════════════════════════════════════
+function clog(type,msg){
+  ['consoleD','consoleM'].forEach(id=>{
+    const el=document.createElement('div');
+    el.className=`cl cl-${type}`;el.textContent=msg;
+    const c=document.getElementById(id);if(c){c.appendChild(el);c.scrollTop=c.scrollHeight;}
+  });
+}
+function clearConsole(){['consoleD','consoleM'].forEach(id=>{const e=document.getElementById(id);if(e)e.innerHTML='';});}
+
+// ══════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════
+let _tt;
+function showToast(type,title,body){
+  const t=document.getElementById('toast');
+  t.className=`toast ${type} show`;
+  document.getElementById('toastTitle').textContent=title;
+  document.getElementById('toastBody').textContent=body;
+  clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// ══════════════════════════════════════
+// MODAL
+// ══════════════════════════════════════
+function openSetup(){document.getElementById('overlay').classList.remove('hidden');}
+function closeSetup(){document.getElementById('overlay').classList.add('hidden');}
+
+// ══════════════════════════════════════
+// KEYBOARD
+// ══════════════════════════════════════
+[edD,edM].forEach(ta=>{
+  ta.addEventListener('keydown',e=>{
+    if(e.key==='Tab'){e.preventDefault();const s=ta.selectionStart,en=ta.selectionEnd;ta.value=ta.value.slice(0,s)+'  '+ta.value.slice(en);ta.selectionStart=ta.selectionEnd=s+2;}
+    if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key==='Enter')checkCode();
+    else if((e.ctrlKey||e.metaKey)&&e.key==='Enter')runCode();
+  });
+});
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+filterWeek(0);
+loadChallenge(0);
+updateProgress();
+setXP(xp);
+</script>
+</body>
+</html>
