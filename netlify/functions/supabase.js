@@ -1,11 +1,11 @@
 // netlify/functions/supabase.js
 // This function acts as a secure proxy between the browser and Supabase.
-// The SUPABASE_URL and SUPABASE_ANON_KEY environment variables are set
+// The SUPABASE_DATABASE_URL and SUPABASE_ANON_KEY environment variables are set
 // in Netlify Dashboard → Site Settings → Environment Variables.
 // They are NEVER exposed to the browser.
 
 exports.handler = async (event) => {
-  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_DATABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
   // Handle CORS preflight
@@ -21,12 +21,12 @@ exports.handler = async (event) => {
     };
   }
 
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  if (!SUPABASE_DATABASE_URL || !SUPABASE_ANON_KEY) {
     return {
       statusCode: 500,
       headers: { "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({
-        error: "Supabase environment variables are not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY in your Netlify dashboard under Site Settings → Environment Variables.",
+        error: "Supabase environment variables are not configured. Set SUPABASE_DATABASE_URL and SUPABASE_ANON_KEY in your Netlify dashboard under Site Settings → Environment Variables.",
       }),
     };
   }
@@ -43,7 +43,7 @@ exports.handler = async (event) => {
     }
 
     const queryString = params ? "?" + new URLSearchParams(params).toString() : "";
-    const url = `${SUPABASE_URL}/rest/v1/${path}${queryString}`;
+    const url = `${SUPABASE_DATABASE_URL}/rest/v1/${path}${queryString}`;
 
     const fetchOptions = {
       method: method || "GET",
