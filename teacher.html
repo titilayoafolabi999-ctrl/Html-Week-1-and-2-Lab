@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>HTMLab — Teacher Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#05080f; --s1:#0c1120; --s2:#111b2e; --s3:#172038;
+      --bd:#1e2d47; --bd2:#253554;
+      --a1:#3b82f6; --a2:#8b5cf6; --a3:#06b6d4;
+      --green:#22c55e; --red:#ef4444; --yellow:#eab308; --orange:#f97316;
+      --text:#e2e8f0; --muted:#64748b; --muted2:#94a3b8;
+      --w1:#f97316; --w2:#3b82f6;
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+    /* ── TOP BAR ── */
+    .topbar{background:var(--s1);border-bottom:1px solid var(--bd);padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50;}
+    .logo{font-family:'Space Mono',monospace;font-weight:700;font-size:15px;background:linear-gradient(90deg,var(--a3),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .topbar-title{font-size:13px;font-weight:600;color:var(--muted2);}
+    .topbar-spacer{flex:1;}
+    .db-pill{display:flex;align-items:center;gap:5px;font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);background:var(--s2);border:1px solid var(--bd);border-radius:99px;padding:4px 10px;}
+    .db-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s;}
+    .db-dot.on{background:var(--green);}
+    .btn-refresh{background:var(--a1);border:none;color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12px;padding:6px 14px;border-radius:7px;cursor:pointer;transition:opacity .15s;}
+    .btn-refresh:hover{opacity:.85;}
+    .btn-refresh:disabled{opacity:.4;cursor:default;}
+    .btn-lab{background:transparent;border:1px solid var(--bd);color:var(--muted2);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12px;padding:6px 14px;border-radius:7px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+    .btn-lab:hover{border-color:var(--a3);color:var(--a3);}
+
+    /* ── MAIN ── */
+    .page{max-width:1200px;margin:0 auto;padding:28px 20px 60px;}
+
+    /* ── STATS ROW ── */
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px;}
+    .stat-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:18px 20px;}
+    .stat-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+    .stat-value{font-family:'Space Mono',monospace;font-size:28px;font-weight:700;line-height:1;}
+    .stat-sub{font-size:11px;color:var(--muted);margin-top:5px;}
+    .stat-value.blue{color:var(--a1);} .stat-value.purple{color:var(--a2);} .stat-value.cyan{color:var(--a3);} .stat-value.green{color:var(--green);} .stat-value.yellow{color:var(--yellow);}
+
+    /* ── SECTION HEADERS ── */
+    .section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .section-title{font-size:13px;font-weight:700;letter-spacing:.5px;color:var(--muted2);text-transform:uppercase;}
+
+    /* ── LEADERBOARD ── */
+    .leaderboard{background:var(--s1);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:28px;}
+    .lb-head{display:grid;grid-template-columns:40px 1fr 90px 90px 90px 140px;gap:12px;padding:10px 18px;background:var(--s2);border-bottom:1px solid var(--bd);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+    .lb-row{display:grid;grid-template-columns:40px 1fr 90px 90px 90px 140px;gap:12px;padding:13px 18px;border-bottom:1px solid var(--bd);align-items:center;transition:background .1s;}
+    .lb-row:last-child{border-bottom:none;}
+    .lb-row:hover{background:var(--s2);}
+    .lb-rank{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--muted);}
+    .lb-rank.r1{color:var(--yellow);}
+    .lb-rank.r2{color:var(--muted2);}
+    .lb-rank.r3{color:var(--orange);}
+    .lb-name{font-weight:600;font-size:13px;}
+    .lb-xp{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--yellow);}
+    .lb-done{font-family:'Space Mono',monospace;font-size:13px;color:var(--green);}
+    .lb-pct-wrap{display:flex;align-items:center;gap:8px;}
+    .lb-pct-track{flex:1;height:5px;background:var(--bd);border-radius:99px;overflow:hidden;}
+    .lb-pct-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--a2),var(--a1));transition:width .4s ease;}
+    .lb-pct-num{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);width:30px;text-align:right;}
+    .lb-time{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;}
+
+    /* ── CHALLENGE COMPLETION TABLE ── */
+    .ch-table{background:var(--s1);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:28px;}
+    .ch-table-head{display:grid;gap:8px;padding:10px 18px;background:var(--s2);border-bottom:1px solid var(--bd);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+    .ch-table-row{display:grid;gap:8px;padding:12px 18px;border-bottom:1px solid var(--bd);align-items:center;}
+    .ch-table-row:last-child{border-bottom:none;}
+    .ch-table-row:hover{background:var(--s2);}
+    .ch-badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;font-family:'Space Mono',monospace;}
+    .ch-badge.w1{background:#f9731620;color:var(--w1);}
+    .ch-badge.w2{background:#3b82f620;color:var(--w2);}
+    .comp-bar-wrap{display:flex;align-items:center;gap:10px;}
+    .comp-bar-track{flex:1;height:6px;background:var(--bd);border-radius:99px;overflow:hidden;}
+    .comp-bar-fill{height:100%;border-radius:99px;transition:width .4s ease;}
+    .comp-bar-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);width:50px;text-align:right;flex-shrink:0;}
+
+    /* ── RECENT ACTIVITY ── */
+    .activity-list{background:var(--s1);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:28px;}
+    .activity-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--bd);}
+    .activity-row:last-child{border-bottom:none;}
+    .act-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;}
+    .act-text{flex:1;font-size:13px;color:var(--muted2);}
+    .act-text strong{color:var(--text);}
+    .act-xp{font-family:'Space Mono',monospace;font-size:11px;color:var(--yellow);}
+    .act-time{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);}
+
+    /* ── EMPTY / LOADING STATES ── */
+    .empty{padding:48px 24px;text-align:center;color:var(--muted);font-size:14px;}
+    .empty .icon{font-size:40px;margin-bottom:12px;}
+    .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--bd2);border-top-color:var(--a1);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── STUDENT DETAIL PANEL ── */
+    .overlay{position:fixed;inset:0;background:#000c;backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;}
+    .overlay.hidden{display:none;}
+    .modal{background:var(--s1);border:1px solid var(--bd);border-radius:14px;width:100%;max-width:620px;max-height:90dvh;overflow-y:auto;padding:24px;box-shadow:0 24px 60px #000;}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+    .modal-head h2{font-size:17px;font-weight:700;}
+    .modal-close{width:28px;height:28px;border-radius:6px;background:none;border:1px solid var(--bd);color:var(--muted);cursor:pointer;font-size:14px;}
+    .modal-close:hover{border-color:var(--red);color:var(--red);}
+    .modal-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+    .modal-stat{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:12px;text-align:center;}
+    .modal-stat .v{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--a1);}
+    .modal-stat .l{font-size:10px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.8px;}
+    .ch-detail-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bd);font-size:12px;}
+    .ch-detail-row:last-child{border-bottom:none;}
+    .ch-detail-status{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+    .ch-detail-status.done{background:var(--green);color:#000;}
+    .ch-detail-status.todo{background:var(--s3);color:var(--muted);}
+    .ch-detail-name{flex:1;color:var(--muted2);}
+    .ch-detail-name.done{color:var(--text);}
+    .ch-detail-xp{font-family:'Space Mono',monospace;font-size:11px;color:var(--yellow);}
+    .ch-detail-time{font-size:10px;font-family:'Space Mono',monospace;color:var(--muted);}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:700px){
+      .lb-head,.lb-row{grid-template-columns:32px 1fr 70px 60px;}
+      .lb-head>*:nth-child(5),.lb-row>*:nth-child(5),
+      .lb-head>*:nth-child(6),.lb-row>*:nth-child(6){display:none;}
+      .stats-row{grid-template-columns:1fr 1fr;}
+      .topbar{padding:0 14px;gap:10px;}
+      .topbar-title{display:none;}
+      .page{padding:16px 12px 60px;}
+    }
+
+    ::-webkit-scrollbar{width:4px;height:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px;}
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">&lt;HTMLab/&gt;</div>
+  <div class="topbar-title">Teacher Dashboard</div>
+  <div class="topbar-spacer"></div>
+  <div class="db-pill"><div class="db-dot" id="dbDot"></div><span id="dbStatus">connecting...</span></div>
+  <button class="btn-refresh" id="refreshBtn" onclick="loadAll()">↻ Refresh</button>
+  <a href="index.html" class="btn-lab">← Student Lab</a>
+</div>
+
+<!-- MAIN PAGE -->
+<div class="page">
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card"><div class="stat-label">Students</div><div class="stat-value blue" id="statStudents">—</div><div class="stat-sub">enrolled</div></div>
+    <div class="stat-card"><div class="stat-label">Completions</div><div class="stat-value green" id="statCompletions">—</div><div class="stat-sub">challenges done</div></div>
+    <div class="stat-card"><div class="stat-label">Total XP</div><div class="stat-value yellow" id="statXP">—</div><div class="stat-sub">earned across class</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Progress</div><div class="stat-value purple" id="statAvg">—</div><div class="stat-sub">of 12 challenges</div></div>
+    <div class="stat-card"><div class="stat-label">Top Student</div><div class="stat-value cyan" id="statTop" style="font-size:16px;margin-top:4px;">—</div><div class="stat-sub" id="statTopXP"></div></div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="section-head">
+    <div class="section-title">🏆 Leaderboard</div>
+    <div style="font-size:11px;color:var(--muted);">Click a student for details</div>
+  </div>
+  <div class="leaderboard">
+    <div class="lb-head">
+      <div>#</div><div>Student</div><div>XP</div><div>Done</div><div>Progress</div><div>Last Active</div>
+    </div>
+    <div id="leaderboard"><div class="empty"><div class="spinner"></div>Loading...</div></div>
+  </div>
+
+  <!-- CHALLENGE COMPLETION -->
+  <div class="section-head">
+    <div class="section-title">📊 Challenge Completion Rates</div>
+  </div>
+  <div class="ch-table" id="challengeTable">
+    <div class="empty"><div class="spinner"></div>Loading...</div>
+  </div>
+
+  <!-- RECENT ACTIVITY -->
+  <div class="section-head">
+    <div class="section-title">⚡ Recent Activity</div>
+    <div style="font-size:11px;color:var(--muted);">Last 20 completions</div>
+  </div>
+  <div class="activity-list" id="activityList">
+    <div class="empty"><div class="spinner"></div>Loading...</div>
+  </div>
+
+</div>
+
+<!-- STUDENT DETAIL MODAL -->
+<div class="overlay hidden" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalName">Student</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-stat-row">
+      <div class="modal-stat"><div class="v" id="modalXP">0</div><div class="l">Total XP</div></div>
+      <div class="modal-stat"><div class="v" id="modalDone">0</div><div class="l">Completed</div></div>
+      <div class="modal-stat"><div class="v" id="modalPct">0%</div><div class="l">Progress</div></div>
+    </div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Challenge Breakdown</div>
+    <div id="modalChallenges"></div>
+  </div>
+</div>
+
+<script>
+const PROXY = '/.netlify/functions/supabase';
+const TOTAL_CHALLENGES = 12;
+
+const CHALLENGE_META = [
+  {id:'w1c1',week:1,label:'What is HTML?',xp:40},
+  {id:'w1c2',week:1,label:'Tags vs Elements',xp:40},
+  {id:'w1c3',week:1,label:'Static vs Dynamic',xp:50},
+  {id:'w1c4',week:1,label:'Frontend vs Backend',xp:60},
+  {id:'w2c1',week:2,label:'DOCTYPE',xp:50},
+  {id:'w2c2',week:2,label:'The <head>',xp:60},
+  {id:'w2c3',week:2,label:'The <body>',xp:60},
+  {id:'w2c4',week:2,label:'HTML Comments',xp:50},
+  {id:'w2c5',week:2,label:'Attributes',xp:60},
+  {id:'w2c6',week:2,label:'Void Elements',xp:60},
+  {id:'w2c7',week:2,label:'Nesting',xp:75},
+  {id:'w2c8',week:2,label:'Full Boilerplate',xp:125},
+];
+const MAX_XP = CHALLENGE_META.reduce((s,c)=>s+c.xp, 0);
+
+// ── DB CALL ──────────────────────────────────────────
+async function dbCall(path, params=null) {
+  try {
+    const r = await fetch(PROXY, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({path, method:'GET', params})
+    });
+    if(!r.ok) return null;
+    return r.json();
+  } catch { return null; }
+}
+
+function setDbStatus(ok) {
+  document.getElementById('dbDot').className = 'db-dot' + (ok?' on':'');
+  document.getElementById('dbStatus').textContent = ok ? 'connected' : 'offline';
+}
+
+// ── TIME FORMATTING ──────────────────────────────────
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff/60000);
+  if (m < 1)  return 'just now';
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m/60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h/24);
+  if (d < 7)  return `${d}d ago`;
+  return new Date(iso).toLocaleDateString();
+}
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString(undefined, {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+// ── COLOUR FOR PROGRESS BARS ─────────────────────────
+function barColour(pct) {
+  if (pct >= 80) return 'var(--green)';
+  if (pct >= 50) return 'var(--a1)';
+  if (pct >= 25) return 'var(--yellow)';
+  return 'var(--red)';
+}
+
+// ── LOAD ALL ─────────────────────────────────────────
+async function loadAll() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  btn.textContent = '↻ Loading...';
+
+  // Fetch all completed rows
+  const rows = await dbCall('student_progress', {
+    completed: 'eq.true',
+    select: 'student_id,challenge,xp_earned,completed_at',
+    order: 'completed_at.desc',
+    limit: '1000'
+  });
+
+  if (!Array.isArray(rows)) {
+    setDbStatus(false);
+    showError();
+    btn.disabled = false; btn.textContent = '↻ Refresh';
+    return;
+  }
+
+  setDbStatus(true);
+  renderStats(rows);
+  renderLeaderboard(rows);
+  renderChallengeTable(rows);
+  renderActivity(rows);
+
+  btn.disabled = false; btn.textContent = '↻ Refresh';
+}
+
+// ── STATS ─────────────────────────────────────────────
+function renderStats(rows) {
+  const students = [...new Set(rows.map(r=>r.student_id))];
+  const totalXP = rows.reduce((s,r)=>s+(r.xp_earned||0), 0);
+  const avgDone = students.length
+    ? (students.map(s=>rows.filter(r=>r.student_id===s).length).reduce((a,b)=>a+b,0) / students.length).toFixed(1)
+    : '0';
+
+  const byStudent = groupByStudent(rows);
+  const top = Object.entries(byStudent).sort((a,b)=>b[1].xp-a[1].xp)[0];
+
+  document.getElementById('statStudents').textContent    = students.length;
+  document.getElementById('statCompletions').textContent = rows.length;
+  document.getElementById('statXP').textContent          = totalXP.toLocaleString();
+  document.getElementById('statAvg').textContent         = avgDone;
+  document.getElementById('statTop').textContent         = top ? top[0] : '—';
+  document.getElementById('statTopXP').textContent       = top ? `${top[1].xp} XP` : '';
+}
+
+// ── GROUP BY STUDENT ──────────────────────────────────
+function groupByStudent(rows) {
+  const map = {};
+  rows.forEach(r => {
+    if (!map[r.student_id]) map[r.student_id] = { xp:0, done:0, last:null, challenges:[] };
+    map[r.student_id].xp += (r.xp_earned||0);
+    map[r.student_id].done++;
+    map[r.student_id].challenges.push(r.challenge);
+    if (!map[r.student_id].last || r.completed_at > map[r.student_id].last)
+      map[r.student_id].last = r.completed_at;
+  });
+  return map;
+}
+
+// ── LEADERBOARD ───────────────────────────────────────
+function renderLeaderboard(rows) {
+  const map = groupByStudent(rows);
+  const sorted = Object.entries(map).sort((a,b)=>b[1].xp-a[1].xp);
+
+  if (!sorted.length) {
+    document.getElementById('leaderboard').innerHTML = `<div class="empty"><div class="icon">📭</div>No student data yet. Students need to complete at least one challenge and be connected to Supabase.</div>`;
+    return;
+  }
+
+  const rankClass = i => i===0?'r1':i===1?'r2':i===2?'r3':'';
+  const rankIcon  = i => i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
+
+  document.getElementById('leaderboard').innerHTML = sorted.map(([name, d], i) => {
+    const pct = Math.round(d.done / TOTAL_CHALLENGES * 100);
+    return `<div class="lb-row" onclick="openStudent('${name}', ${JSON.stringify(rows.filter(r=>r.student_id===name))})">
+      <div class="lb-rank ${rankClass(i)}">${rankIcon(i)}</div>
+      <div class="lb-name">${name}</div>
+      <div class="lb-xp">⚡${d.xp}</div>
+      <div class="lb-done">${d.done}/${TOTAL_CHALLENGES}</div>
+      <div class="lb-pct-wrap">
+        <div class="lb-pct-track"><div class="lb-pct-fill" style="width:${pct}%;background:${barColour(pct)};"></div></div>
+        <div class="lb-pct-num">${pct}%</div>
+      </div>
+      <div class="lb-time">${timeAgo(d.last)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── CHALLENGE TABLE ───────────────────────────────────
+function renderChallengeTable(rows) {
+  const students = new Set(rows.map(r=>r.student_id)).size;
+  if (!students) {
+    document.getElementById('challengeTable').innerHTML = `<div class="empty"><div class="icon">📊</div>No data yet.</div>`;
+    return;
+  }
+
+  const colStyle = 'grid-template-columns:30px 1fr 60px 1fr 80px;';
+
+  let html = `<div class="ch-table-head" style="${colStyle}">
+    <div>#</div><div>Challenge</div><div>Week</div><div>Completion Rate</div><div>Students</div>
+  </div>`;
+
+  CHALLENGE_META.forEach((ch, i) => {
+    const done = rows.filter(r=>r.challenge===ch.id).length;
+    const pct  = students ? Math.round(done/students*100) : 0;
+    html += `<div class="ch-table-row" style="${colStyle}">
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);">${i+1}</div>
+      <div style="font-size:13px;font-weight:600;">${ch.label}</div>
+      <div><span class="ch-badge w${ch.week}">Week ${ch.week}</span></div>
+      <div class="comp-bar-wrap">
+        <div class="comp-bar-track"><div class="comp-bar-fill" style="width:${pct}%;background:${barColour(pct)};"></div></div>
+        <div class="comp-bar-label">${pct}%</div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:12px;color:var(--green);">${done}/${students}</div>
+    </div>`;
+  });
+
+  document.getElementById('challengeTable').innerHTML = html;
+}
+
+// ── RECENT ACTIVITY ───────────────────────────────────
+function renderActivity(rows) {
+  const recent = [...rows].sort((a,b)=> (b.completed_at||'') > (a.completed_at||'') ? 1 : -1).slice(0, 20);
+
+  if (!recent.length) {
+    document.getElementById('activityList').innerHTML = `<div class="empty"><div class="icon">⚡</div>No activity yet.</div>`;
+    return;
+  }
+
+  const meta = id => CHALLENGE_META.find(c=>c.id===id)||{label:id,xp:0};
+
+  document.getElementById('activityList').innerHTML = recent.map(r => {
+    const m = meta(r.challenge);
+    return `<div class="activity-row">
+      <div class="act-dot"></div>
+      <div class="act-text"><strong>${r.student_id}</strong> completed <strong>${m.label}</strong></div>
+      <div class="act-xp">+${r.xp_earned||m.xp} XP</div>
+      <div class="act-time">${timeAgo(r.completed_at)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── STUDENT DETAIL MODAL ──────────────────────────────
+function openStudent(name, studentRows) {
+  const done = studentRows.length;
+  const xp   = studentRows.reduce((s,r)=>s+(r.xp_earned||0), 0);
+  const pct  = Math.round(done / TOTAL_CHALLENGES * 100);
+  const completedIds = new Set(studentRows.map(r=>r.challenge));
+
+  document.getElementById('modalName').textContent = name;
+  document.getElementById('modalXP').textContent   = `⚡${xp}`;
+  document.getElementById('modalDone').textContent = `${done}/${TOTAL_CHALLENGES}`;
+  document.getElementById('modalPct').textContent  = `${pct}%`;
+
+  document.getElementById('modalChallenges').innerHTML = CHALLENGE_META.map(ch => {
+    const isDone = completedIds.has(ch.id);
+    const row = studentRows.find(r=>r.challenge===ch.id);
+    return `<div class="ch-detail-row">
+      <div class="ch-detail-status ${isDone?'done':'todo'}">${isDone?'✓':'○'}</div>
+      <span class="ch-badge w${ch.week}" style="margin-right:4px;">W${ch.week}</span>
+      <div class="ch-detail-name ${isDone?'done':''}">${ch.label}</div>
+      <div class="ch-detail-xp">${isDone?'+'+ch.xp+' XP':ch.xp+' XP'}</div>
+      <div class="ch-detail-time">${row ? fmtTime(row.completed_at) : ''}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('overlay').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('overlay').classList.add('hidden'); }
+document.getElementById('overlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeModal(); });
+
+// ── ERROR STATE ───────────────────────────────────────
+function showError() {
+  const msg = `<div class="empty">
+    <div class="icon">⚠️</div>
+    <div>Cannot connect to Supabase.</div>
+    <div style="margin-top:8px;font-size:12px;color:var(--muted);">Make sure your Supabase project is connected in Netlify → Integrations, then redeploy.</div>
+  </div>`;
+  ['leaderboard','challengeTable','activityList'].forEach(id=>document.getElementById(id).innerHTML=msg);
+}
+
+// ── INIT ─────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
